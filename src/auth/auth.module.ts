@@ -36,7 +36,7 @@ import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
     AccessTokenStrategy,
     {
       provide: APP_GUARD,
-      useClass: ThrottlerGuard, // Barcha endpointlarga rate limit qo'llash
+      useClass: ThrottlerGuard, // Barcha endpoi ntlarga rate limit qo'llash
     },
   ],
 })
