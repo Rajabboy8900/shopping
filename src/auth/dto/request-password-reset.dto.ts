@@ -4,7 +4,7 @@ import { IsEmail, IsNotEmpty } from 'class-validator';
 export class SendResetDto {
   @ApiProperty({
     example: "user@gmail.com",
-    description: "Parolni tiklash uchun elektron pochta manzili",
+    description: "Parolni  tiklash uchun elektron pochta manzili",
     format: "email",
     required: true,
     maxLength: 255,
