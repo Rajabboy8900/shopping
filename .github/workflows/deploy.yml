@@ -52,3 +52,15 @@ jobs:
             pm2 delete shopping || true
             pm2 start dist/main.js --name shopping
             pm2 save
+
+
+
+
+
+
+
+
+
+
+
+
