@@ -23,30 +23,32 @@ jobs:
           script: |
             set -e
             cd /home/ubuntu
-            rm -rf cyber-market
+            rm -rf shopping
             git clone https://github.com/Rajabboy8900/shopping
-            cd cyber-market
+            cd shopping
 
             # .env faylni yaratish
             echo "PORT=${{ secrets.PORT }}" > .env
-            echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" >> .env
-            echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> .env
-            echo "EMAIL_USER=${{ secrets.EMAIL_USER }}" >> .env
-            echo "EMAIL_PASS=${{ secrets.EMAIL_PASS }}" >> .env
-            echo "UPLOADCARE_PUBLIC_KEY=${{ secrets.UPLOADCARE_PUBLIC_KEY }}" >> .env
+            echo "JWT_ACCESS_SECRET=${{ secrets.JWT_ACCESS_SECRET }}" >> .env
+            echo "JWT_REFRESH_SECRET=${{ secrets.JWT_REFRESH_SECRET }}" >> .env
+            echo "JWT_EXPIRATION=${{ secrets.JWT_EXPIRATION }}" >> .env
+            echo "DB_HOST=${{ secrets.DB_HOST }}" >> .env
+            echo "DB_PORT=${{ secrets.DB_PORT }}" >> .env
+            echo "DB_USERNAME=${{ secrets.DB_USERNAME }}" >> .env
+            echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
+            echo "DB_NAME=${{ secrets.DB_NAME }}" >> .env
+            echo "GMAIL_PASS=${{ secrets.GMAIL_PASS }}" >> .env
+            echo "GMAIL_USER=${{ secrets.GMAIL_USER }}" >> .env
 
-            # Paketlarni o'rnatish va build qilish
+            # Paketlarni o‘rnatish va build
             npm install
             npm run build
 
-            # Prisma migration (agar Prisma ishlatilgan bo‘lsa)
+            # Prisma migrate (agar ishlatilsa)
             npx prisma generate || true
             npx prisma migrate deploy || true
 
             # PM2 bilan ishga tushirish
-            pm2 delete cyber-market || true
-            pm2 start dist/main.js --name cyber-market
+            pm2 delete shopping || true
+            pm2 start dist/main.js --name shopping
             pm2 save
-
-
-# ///////

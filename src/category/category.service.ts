@@ -61,6 +61,10 @@ import {
       return { message: 'Kategoriya muvaffaqiyatli yangilandi!' };
     }
   
+
+
+
+    
     async remove(id: string) {
       const category = await this.categoryRepository.findOne({ where: { id } });
       if (!category) {
