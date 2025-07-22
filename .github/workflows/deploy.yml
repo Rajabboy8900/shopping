@@ -17,12 +17,12 @@ jobs:
         uses: appleboy/ssh-action@v1.0.0
         with:
           host: ${{ secrets.VPS_HOST }}
-          username: ubuntu
+          username: root
           key: ${{ secrets.VPS_SSH_KEY }}
           port: 22
           script: |
             set -e
-            cd /home/ubuntu
+            cd root
             rm -rf shopping
             git clone https://github.com/Rajabboy8900/shopping.git
             cd shopping
