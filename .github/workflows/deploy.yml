@@ -22,7 +22,7 @@ jobs:
           port: 22
           script: |
             set -e
-            cd root
+            cd /home/ubuntu
             rm -rf shopping
             git clone https://github.com/Rajabboy8900/shopping.git
             cd shopping
