@@ -44,9 +44,7 @@ jobs:
             npm install
             npm run build
 
-            # Prisma migrate (ixtiyoriy, kerak bo‘lsa)
-            npx prisma generate || true
-            npx prisma migrate deploy || true
+        
 
             # PM2 bilan ishga tushirish
             pm2 delete shopping || true

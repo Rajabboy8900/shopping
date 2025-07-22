@@ -221,7 +221,7 @@ export class AuthController {
   @ApiOkResponse({ 
     description: 'Parol muvaffaqiyatli o‘zgartirildi',
     schema: {
-      example: { message: 'Parolingiz muvaffaqiyatli o‘zgartirildi' }
+      example: { message: 'Parolingiz muvaffaqiyatli o‘zgartirildi    ' }
     }
   })
   @ApiUnauthorizedResponse({ description: 'Noto‘g‘ri OTP kodi' })
