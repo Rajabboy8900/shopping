@@ -24,7 +24,7 @@ jobs:
             set -e
             cd /home/ubuntu
             rm -rf cyber-market
-            git clone https://github.com/Rajabboy8900/shop_api
+            git clone https://github.com/Rajabboy8900/shopping
             cd cyber-market
 
             # .env faylni yaratish
