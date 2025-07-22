@@ -31,7 +31,7 @@ import {
     @UseGuards(AuthGuard('jwt'), RolesGuard)
     @Roles(Role.SUPERADMIN, Role.ADMIN)
     @ApiBearerAuth()
-    @ApiOperation({ summary: 'Yangi kategoriya yaratish (admin/superadmin)' })
+    @ApiOperation({ summary: 'Yangi   kategoriya yaratish (admin/superadmin)' })
     @ApiResponse({ status: 201, description: 'Kategoriya yaratildi' })
     @ApiResponse({ status: 409, description: 'Kategoriya nomi mavjud' })
     create(@Body() dto: CreateCategoryDto) {
