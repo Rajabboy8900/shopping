@@ -1,28 +1,30 @@
-import { NestFactory, Reflector } from '@nestjs/core';
+import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import * as cookieParser from 'cookie-parser'
+import * as cookieParser from 'cookie-parser';
+import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 
 async function bootstrap() {
-    const app = await NestFactory.create(AppModule);
-    app.use(cookieParser())
-    // Swagger sozlamasi
-    const config = new DocumentBuilder()
-        .setTitle('E-Store API')
-        .setDescription('E-Store backend API documentation')
-        .setVersion('1.0')
-        .addBearerAuth()
-        .build();
+  const app = await NestFactory.create(AppModule);
 
-    const document = SwaggerModule.createDocument(app, config);
-    SwaggerModule.setup('api', app, document);
+  // Cookie parserni middleware sifatida ulash
+  app.use(cookieParser());
 
-    const PORT = process.env.PORT ?? 3000
-    await app.listen(PORT, () => {
-        console.log(`Server is running on port ${PORT}`)
-    })
+  // Swagger konfiguratsiyasi
+  const swaggerConfig = new DocumentBuilder()
+    .setTitle('E-Store API Docs')
+    .setDescription('Elektron do‘kon uchun backend hujjatlari')
+    .setVersion('1.0.0')
+    .addBearerAuth({ type: 'http', scheme: 'bearer', bearerFormat: 'JWT' })
+    .build();
+
+  const swaggerDoc = SwaggerModule.createDocument(app, swaggerConfig);
+  SwaggerModule.setup('api', app, swaggerDoc);
+
+  const port = parseInt(process.env.PORT || '3000', 10);
+  await app.listen(port);
+
+  console.log(`🚀 Server ishga tushdi: http://localhost:${port}`);
+  console.log(`📘 Swagger hujjatlar: http://localhost:${port}/api`);
 }
-bootstrap()
 
-
-
+bootstrap();

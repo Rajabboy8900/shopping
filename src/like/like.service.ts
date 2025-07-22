@@ -15,7 +15,7 @@ export class LikeService {
             const existing = await this.likeRepository.findOne({
                 where: {
                     auth: { id: authId },
-                    product: { id: productId },
+                    product: { productTitle: productId },
                 },
             });
 

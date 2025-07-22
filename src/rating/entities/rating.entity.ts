@@ -1,22 +1,37 @@
-import { Auth } from "src/auth/entities/auth.entity";
-import { Product } from "src/product/entities/product.entity";
-import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  ManyToOne,
+  JoinColumn,
+  CreateDateColumn,
+} from 'typeorm';
+import { Product } from 'src/product/entities/product.entity';
+import { UserAccount } from 'src/auth/entities/auth.entity';
 
-@Entity()
+@Entity({ name: 'ratings' })
 export class Rating {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ type: 'int', default: 5 }) 
-  value: number;
+  @Column({ type: 'int', default: 5 })
+  score: number;
 
-  @ManyToOne(() => Product, (product) => product.ratings)
-  @JoinColumn()
+  @ManyToOne(() => Product, (product) => product.ratings, {
+    onDelete: 'CASCADE',
+    eager: false,
+  })
+  @JoinColumn({ name: 'product_id' })
   product: Product;
 
-  @ManyToOne(() => Auth, (user) => user.ratings, { nullable: true })
-  user: Auth;
+  @ManyToOne(() => UserAccount, (user) => user.givenRatings, {
+    onDelete: 'SET NULL',
+    nullable: true,
+    eager: false,
+  })
+  @JoinColumn({ name: 'user_id' })
+  user: UserAccount;
 
-  @CreateDateColumn()
-  createdAt: Date;
+  @CreateDateColumn({ name: 'rated_at' })
+  ratedAt: Date;
 }

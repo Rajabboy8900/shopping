@@ -23,14 +23,14 @@ export class RatingController {
     @ApiOperation({ summary: 'Mahsulotga reyting qo‘shish (1-5)' })
     async addRating(@Body() dto: CreateRatingDto, @Request() req) {
         const userId = req.user.id;
-        return this.ratingService.create(dto, userId);
+        return this.ratingService.createRating(dto, userId);
     }
 
     @Get('average/:productId')
     @ApiOperation({ summary: 'Mahsulotning o‘rtacha reytingini olish' })
     async getAverage(@Param('productId') productId: string) {
         return {
-            average: await this.ratingService.getAverageRating(productId),
+            average: await this.ratingService.getAverageScore(productId),
         };
     }
 

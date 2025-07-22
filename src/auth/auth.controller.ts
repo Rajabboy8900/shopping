@@ -1,128 +1,232 @@
-import { Controller, Get, Post, Body, Param, Res, Req, Put } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Res,
+  Req,
+  Put,
+  UseGuards,
+} from '@nestjs/common';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+  ApiBody,
+  ApiCookieAuth,
+  ApiParam,
+  ApiUnauthorizedResponse,
+  ApiNotFoundResponse,
+  ApiConflictResponse,
+  ApiCreatedResponse,
+  ApiOkResponse,
+} from '@nestjs/swagger';
+import { Request, Response } from 'express';
+
 import { AuthService } from './auth.service';
 import { CreateAuthDto } from './dto/create-auth.dto';
-import { VerifyOtpDto } from './dto/verify_otp.dto';
-import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { Request, Response } from 'express';
-import { UpdateAuthRoleDto } from './dto/update-authRole.dto';
-import { SendResetDto } from './dto/send-reset.dto';
-import { ResetPasswordDto } from './dto/reset-password.dto';
-import { UseGuards } from '@nestjs/common';
+import { ConfirmOtpDto } from './dto/confirm-otp.dto';
+import { SendResetDto } from './dto/request-password-reset.dto';
+import { ResetPasswordDto } from './dto/recover-password.dto';
+import { UpdateAuthRoleDto } from './dto/change-user-role.dto';
+
 import { Roles } from 'src/common/decorators/roles.decorator';
 import { Role } from './role.enum';
 import { AuthGuard } from '@nestjs/passport';
 import { RolesGuard } from 'src/common/guards/roles.guard';
 
-
-
-@ApiTags('Auth')
+@ApiTags('Autentifikatsiya')
 @Controller('auth')
 export class AuthController {
-    constructor(private readonly authService: AuthService) { }
+  constructor(private readonly authService: AuthService) {}
 
-    @Post("register")
-    @ApiOperation({ summary: 'Foydalanuvchini ro‘yxatdan o‘tkazish' })
-    @ApiResponse({ status: 201, description: 'Foydalanuvchi yaratildi' })
-    @ApiResponse({ status: 409, description: 'Email allaqachon ro‘yxatda bor' })
-    async register(@Body() createAuthDto: CreateAuthDto) {
-        await this.authService.register(createAuthDto);
-        return { message: "Iltimos emailingizga yuborilgan kodni kiriting!" };
+  @Post('register')
+  @ApiOperation({ 
+    summary: 'Foydalanuvchini ro‘yxatdan o‘tkazish',
+    description: 'Yangi foydalanuvchi registratsiyasi uchun endpoint'
+  })
+  @ApiBody({ type: CreateAuthDto })
+  @ApiCreatedResponse({ 
+    description: 'Foydalanuvchi muvaffaqiyatli yaratildi',
+    schema: {
+      example: { message: 'Tasdiqlash kodi emailingizga yuborildi!' }
     }
+  })
+  @ApiConflictResponse({ 
+    description: 'Email allaqachon ro‘yxatda bor' 
+  })
+  @ApiResponse({ 
+    status: 400, 
+    description: 'Noto‘g‘ri so‘rov formati' 
+  })
+  async register(@Body() dto: CreateAuthDto) {
+    await this.authService.register(dto);
+    return { message: 'Tasdiqlash kodi emailingizga yuborildi!' };
+  }
 
-    @Post("verify_otp")
-    @ApiOperation({ summary: 'OTP orqali emailni tasdiqlash' })
-    @ApiResponse({ status: 200, description: 'Email manzilingiz tasdiqlandi!' })
-    @ApiResponse({ status: 409, description: 'Noto‘g‘ri OTP yoki email' })
-    @ApiResponse({ status: 404, description: 'Foydalanuvchi topilmadi' })
-    async verifyOtp(@Body() verifyOtpDto: VerifyOtpDto) {
-        await this.authService.verifyOtp(verifyOtpDto.email, verifyOtpDto.otp);
-        return { message: "Email manzilingiz tasdiqlandi!" };
+  @Post('verify_otp')
+  @ApiOperation({ 
+    summary: 'OTP orqali emailni tasdiqlash',
+    description: 'Elektron pochta manzilini tasdiqlash uchun OTP kodini tekshirish'
+  })
+  @ApiBody({ type: ConfirmOtpDto })
+  @ApiOkResponse({ 
+    description: 'Email muvaffaqiyatli tasdiqlandi',
+    schema: {
+      example: { message: 'Email tasdiqlandi!' }
     }
+  })
+  @ApiUnauthorizedResponse({ 
+    description: 'Noto‘g‘ri yoki eskirgan OTP kodi' 
+  })
+  @ApiNotFoundResponse({ 
+    description: 'Elektron pochta manzili topilmadi' 
+  })
+  async verifyOtp(@Body() dto: ConfirmOtpDto) {
+    await this.authService.verifyOtp(dto.otp, dto.email);
+    return { message: 'Email tasdiqlandi!' };
+  }
 
-    @Post("login")
-    @ApiOperation({ summary: "Foydalanuvchini tizimga kirishi" })
-    @ApiResponse({ status: 200, description: 'Foydalanuvchi tizimga kirdi' })
-    @ApiResponse({ status: 401, description: 'Noto‘g‘ri email yoki parol' })
-    @ApiResponse({ status: 404, description: 'Foydalanuvchi topilmadi' })
-    @ApiResponse({ status: 500, description: 'Serverda xato yuz berdi' })
-    async login(@Body() dto: CreateAuthDto, @Res({ passthrough: true }) res: Response) {
-        return this.authService.login(dto, res)
+  @Post('login')
+  @ApiOperation({ 
+    summary: 'Tizimga kirish',
+    description: 'Foydalanuvchi hisobiga kirish uchun endpoint'
+  })
+  @ApiBody({ type: CreateAuthDto })
+  @ApiOkResponse({ 
+    description: 'Kirish muvaffaqiyatli',
+    schema: {
+      example: { 
+        accessToken: 'jwt.token.here',
+        refreshToken: 'refresh.token.here' 
+      }
     }
+  })
+  @ApiNotFoundResponse({ description: 'Foydalanuvchi topilmadi' })
+  @ApiUnauthorizedResponse({ description: 'Email yoki parol noto‘g‘ri' })
+  async login(
+    @Body() dto: CreateAuthDto,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    return this.authService.login(dto, res);
+  }
 
-
-    @Post("refresh")
-    @ApiOperation({ summary: 'Tokenni yangilash' })
-    @ApiResponse({ status: 200, description: 'Token yangilandi' })
-    @ApiResponse({ status: 401, description: 'Token noto‘g‘ri' })
-    @ApiResponse({ status: 500, description: 'Serverda xato yuz berdi' })
-    async refresh(@Req() req: Request) {
-        return this.authService.refreshToken(req);
+  @Post('refresh')
+  @ApiOperation({ 
+    summary: 'Tokenni yangilash',
+    description: 'Access token yangilash uchun endpoint'
+  })
+  @ApiCookieAuth('refresh_token')
+  @ApiOkResponse({ 
+    description: 'Yangi access token',
+    schema: {
+      example: { accessToken: 'new.jwt.token.here' }
     }
+  })
+  @ApiUnauthorizedResponse({ description: 'Yaroqsiz refresh token' })
+  async refresh(@Req() req: Request) {
+    return this.authService.refreshToken(req);
+  }
 
-    @Post('logout')
-    @ApiOperation({ summary: 'Foydalanuvchini tizimdan chiqishi' })
-    @ApiResponse({ status: 200, description: 'Foydalanuvchi tizimdan chiqdi' })
-    @ApiResponse({ status: 500, description: 'Serverda xato yuz berdi' })
-    async logout(@Res({ passthrough: true }) res: Response) {
-        res.clearCookie('refresh_token', {
-            httpOnly: true,
-            secure: false,
-            sameSite: 'strict',
-            path: '/',
-        });
-
-        return { message: 'Tizimdan chiqildi' };
+  @Post('logout')
+  @ApiOperation({ 
+    summary: 'Tizimdan chiqish',
+    description: 'Foydalanuvchi sessiyasini tugatish'
+  })
+  @ApiOkResponse({ 
+    description: 'Tizimdan chiqish muvaffaqiyatli',
+    schema: {
+      example: { message: 'Tizimdan chiqdingiz' }
     }
+  })
+  async logout(@Res({ passthrough: true }) res: Response) {
+    res.clearCookie('refresh_token', {
+      httpOnly: true,
+      secure: false,
+      sameSite: 'strict',
+      path: '/',
+    });
+    return { message: 'Tizimdan chiqdingiz' };
+  }
 
+  @Get('all')
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Roles(Role.SUPERADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({ 
+    summary: 'Barcha foydalanuvchilarni olish',
+    description: 'Faqat SUPERADMIN rolidagi foydalanuvchilar uchun'
+  })
+  @ApiOkResponse({ 
+    description: 'Foydalanuvchilar ro‘yxati',
+    type: [UpdateAuthRoleDto] // UserAccount entitysi import qilinishi kerak
+  })
+  @ApiUnauthorizedResponse({ description: 'Ruxsat etilmagan' })
+  async getAllUsers() {
+    return this.authService.getAllUsers();
+  }
 
+  @Put(':id/role')
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Roles(Role.SUPERADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({ 
+    summary: 'Foydalanuvchining rolini yangilash',
+    description: 'Foydalanuvchi rolini o‘zgartirish (faqat SUPERADMIN)'
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'Foydalanuvchi IDsi (UUID formatida)',
+    example: '550e8400-e29b-41d4-a716-446655440000'
+  })
+  @ApiBody({ type: UpdateAuthRoleDto })
+  @ApiOkResponse({ 
+    description: 'Rol muvaffaqiyatli o‘zgartirildi',
+    type: UpdateAuthRoleDto // UserAccount entitysi import qilinishi kerak
+  })
+  @ApiNotFoundResponse({ description: 'Foydalanuvchi topilmadi' })
+  @ApiUnauthorizedResponse({ description: 'Ruxsat etilmagan' })
+  async updateUserRole(
+    @Param('id') id: string,
+    @Body() dto: UpdateAuthRoleDto,
+  ) {
+    return this.authService.updateUserRole(id, dto);
+  }
 
-    @Get('all')
-    @UseGuards(AuthGuard("jwt"), RolesGuard)
-    @Roles(Role.SUPERADMIN)
-    @ApiOperation({ summary: 'Faqat superadmin huquqi bor!' })
-    @ApiOperation({ summary: 'Barcha foydalanuvchilarni olish' })
-    @ApiResponse({ status: 200, description: 'Foydalanuvchilar ro‘yxati' })
-    @ApiResponse({ status: 404, description: 'Foydalanuvchilar topilmadi' })
-    @ApiResponse({ status: 500, description: 'Serverda xato yuz berdi' })
-    @ApiBearerAuth()
-    async getAllUsers() {
-        return this.authService.getAllUsers();
+  @Post('forgot_password')
+  @ApiOperation({ 
+    summary: 'Parol tiklash uchun kod yuborish',
+    description: 'Elektron pochta orqali parolni tiklash kodi yuborish'
+  })
+  @ApiBody({ type: SendResetDto })
+  @ApiOkResponse({ 
+    description: 'Parol tiklash kodi yuborildi',
+    schema: {
+      example: { message: 'Parol tiklash kodi emailingizga yuborildi' }
     }
+  })
+  @ApiNotFoundResponse({ description: 'Elektron pochta manzili topilmadi' })
+  async sendResetCode(@Body() dto: SendResetDto) {
+    return this.authService.sendResetCode(dto);
+  }
 
-
-    @Put(':id/role')
-    @UseGuards(AuthGuard('jwt'), RolesGuard)
-    @Roles(Role.SUPERADMIN)
-    @ApiOperation({ summary: 'Foydalanuvchining rolini yangilash (faqat superadmin)' })
-    @ApiResponse({ status: 200, description: 'Foydalanuvchining roli yangilandi' })
-    @ApiResponse({ status: 403, description: 'Ruxsat yo‘q (superadmin emas)' })
-    @ApiResponse({ status: 404, description: 'Foydalanuvchi topilmadi' })
-    @ApiBearerAuth()
-    async updateUserRole(
-        @Param('id') id: string,
-        @Body() updateAuthDto: UpdateAuthRoleDto,
-    ) {
-        return this.authService.updateUserRole(id, updateAuthDto);
+  @Post('reset_password')
+  @ApiOperation({ 
+    summary: 'Parolni tiklash',
+    description: 'OTP kod yordamida yangi parol o‘rnatish'
+  })
+  @ApiBody({ type: ResetPasswordDto })
+  @ApiOkResponse({ 
+    description: 'Parol muvaffaqiyatli o‘zgartirildi',
+    schema: {
+      example: { message: 'Parolingiz muvaffaqiyatli o‘zgartirildi' }
     }
-
-
-    @Post('forgot_password')
-    @ApiOperation({ summary: 'Parolni tiklash uchun kod yuborish' })
-    @ApiResponse({ status: 200, description: 'Parolni tiklash uchun kod yuborildi' })
-    @ApiResponse({ status: 404, description: 'Foydalanuvchi topilmadi' })
-    @ApiResponse({ status: 500, description: 'Serverda xato yuz berdi' })
-    async sendResetCode(@Body() dto: SendResetDto) {
-        return this.authService.sendResetCode(dto)
-    }
-
-    @Post('reset_password')
-    @ApiOperation({ summary: 'Parolni tiklash' })
-    @ApiResponse({ status: 200, description: 'Parol muvaffaqiyatli tiklandi' })
-    @ApiResponse({ status: 404, description: 'Foydalanuvchi topilmadi' })
-    @ApiResponse({ status: 500, description: 'Serverda xato yuz berdi' })
-    async resetPassword(@Body() dto: ResetPasswordDto) {
-        return this.authService.resetPassword(dto)
-    }
-
+  })
+  @ApiUnauthorizedResponse({ description: 'Noto‘g‘ri OTP kodi' })
+  @ApiNotFoundResponse({ description: 'Elektron pochta manzili topilmadi' })
+  async resetPassword(@Body() dto: ResetPasswordDto) {
+    return this.authService.resetPassword(dto);
+  }
 }
-

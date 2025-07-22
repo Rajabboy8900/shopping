@@ -1,8 +1,12 @@
 import {
-    Entity, PrimaryGeneratedColumn, Column,
-    CreateDateColumn, UpdateDateColumn,
-    ManyToOne, JoinColumn,
-    OneToMany
+    Entity,
+    PrimaryGeneratedColumn,
+    Column,
+    CreateDateColumn,
+    UpdateDateColumn,
+    ManyToOne,
+    JoinColumn,
+    OneToMany,
 } from 'typeorm';
 import { Category } from '../../category/entities/category.entity';
 import { Rating } from 'src/rating/entities/rating.entity';
@@ -10,22 +14,20 @@ import { Comment } from 'src/comment/entities/comment.entity';
 import { Like } from 'src/like/entities/like.entity';
 import { Cart } from 'src/cart/entities/cart.entity';
 
-export enum MemorySize {
-    GB32 = '32GB',
-    GB64 = '64GB',
-    GB128 = '128GB',
-    GB256 = '256GB',
-    GB512 = '512GB',
-    TB1 = '1TB',
+export enum MemoryOption {
+    GB_128 = '128GB',
+    GB_256 = '256GB',
+    GB_512 = '512GB',
+    TB_1 = '1TB',
 }
 
-export enum StorageType {
+export enum StorageOption {
     HDD = 'HDD',
     SSD = 'SSD',
-    NVME = 'NVMe SSD',
+    NVME_SSD = 'NVMe SSD',
 }
 
-export enum ProductType {
+export enum ProductCategory {
     PHONE = 'Phone',
     LAPTOP = 'Laptop',
     TABLET = 'Tablet',
@@ -36,93 +38,97 @@ export enum ProductType {
 @Entity()
 export class Product {
     @PrimaryGeneratedColumn('uuid')
-    id: string;
+id: string; // SHU BO'LISHI KERAK
 
-    @Column()
-    title: string;
 
-    @Column()
-    model: string;
-
-    @Column()
-    description: string;
-
-    @Column({
-        type: 'enum',
-        enum: ProductType,
-    })
-    type: ProductType;
-
-    @Column({ nullable: true })
-    brand: string;
-
-    @Column({ nullable: true })
-    color: string;
-
-    @Column({
-        type: 'enum',
-        enum: MemorySize,
-        nullable: true,
-    })
-    memory: MemorySize;
-
-    @Column({
-        type: 'enum',
-        enum: StorageType,
-        nullable: true,
-    })
-    storageType: StorageType;
-
-    @Column({ nullable: true })
-    storageCapacity: string; // e.g. "512GB", "1TB"
-
-    @Column({ nullable: true })
-    cpu: string;
-
-    @Column({ nullable: true })
-    gpu: string;
-
-    @Column({ nullable: true })
-    screenSize: string; // e.g. "6.5 inch", "15.6 inch"
-
-    @Column({ nullable: true })
-    battery: string;
-
-    @Column({ nullable: true })
-    camera: string;
-
-    @Column('decimal')
-    price: number;
 
     @Column({ type: 'text' })
     image: string;
 
-    @Column({ nullable: true })
-    categoryId: string
+    @Column()
+    productTitle: string;
 
-    @ManyToOne(() => Category, category => category.product, {
+    @Column()
+    modelName: string;
+
+    @Column()
+    productDescription: string;
+
+    @Column({
+        type: 'enum',
+        enum: ProductCategory,
+    })
+    productType: ProductCategory;
+
+    @Column({ nullable: true })
+    manufacturer?: string;
+
+    @Column({ nullable: true })
+    colorName?: string;
+
+    @Column({
+        type: 'enum',
+        enum: MemoryOption,
+        nullable: true,
+    })
+    ramSize?: MemoryOption;
+
+    @Column({
+        type: 'enum',
+        enum: StorageOption,
+        nullable: true,
+    })
+    storageType?: StorageOption;
+
+    @Column({ nullable: true })
+    storageSize?: string;
+
+    @Column({ nullable: true })
+    processor?: string;
+
+    @Column({ nullable: true })
+    graphicsProcessor?: string;
+
+    @Column({ nullable: true })
+    displaySize?: string;
+
+    @Column({ nullable: true })
+    batteryCapacity?: string;
+
+    @Column({ nullable: true })
+    cameraSpecs?: string;
+
+    @Column('decimal')
+    priceAmount: number;
+
+    @Column({ type: 'text' })
+    mainImageUrl: string;
+
+    @Column({ nullable: true })
+    categoryRefId?: string;
+
+    @ManyToOne(() => Category, (cat) => cat.id, {
         eager: true,
         onDelete: 'SET NULL',
     })
+    @JoinColumn({ name: 'categoryRefId' })
+    category?: Category;
 
-    @JoinColumn({ name: 'categoryId' })
-    category: Category;
+    @OneToMany(() => Rating, (rate) => rate.product)
+    ratings?: Rating[];
 
-    @OneToMany(() => Rating, (rating) => rating.product)
-    ratings: Rating[]
+    @OneToMany(() => Comment, (comm) => comm.product)
+    comments?: Comment[];
 
-    @OneToMany(() => Comment, (comment) => comment.product)
-    comments: Comment[];
-    @OneToMany(() => Like, like => like.product)
-    likes: Like[];
+    @OneToMany(() => Like, (like) => like.product)
+    likes?: Like[];
 
     @OneToMany(() => Cart, (cart) => cart.product)
-    cartItems: Cart[];
-
+    cartItems?: Cart[];
 
     @CreateDateColumn({ type: 'timestamptz' })
-    createdAt: Date;
+    createdAt!: Date;
 
     @UpdateDateColumn({ type: 'timestamptz' })
-    updatedAt: Date;
+    updatedAt!: Date;
 }

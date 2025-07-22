@@ -1,29 +1,42 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, CreateDateColumn } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  ManyToOne,
+  JoinColumn,
+  CreateDateColumn,
+} from 'typeorm';
 import { Product } from 'src/product/entities/product.entity';
-import { Auth } from 'src/auth/entities/auth.entity';
+import { UserAccount } from 'src/auth/entities/auth.entity';
 
-@Entity()
+@Entity('cart_items')
 export class Cart {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @ManyToOne(() => Auth, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'authId' })
-  auth: Auth;
+  @ManyToOne(() => UserAccount, (user) => user.shoppingCarts, {
+    onDelete: 'CASCADE',
+    eager: false, 
+  })
+  @JoinColumn({ name: 'user_id' })
+  user: UserAccount;
 
-  @Column()
-  authId: string;
+  @Column({ name: 'user_id' })
+  userId: string;
 
-  @ManyToOne(() => Product, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'productId' })
+  @ManyToOne(() => Product, (product) => product.cartItems, {
+    onDelete: 'CASCADE',
+    eager: false,
+  })
+  @JoinColumn({ name: 'product_id' })
   product: Product;
 
-  @Column()
+  @Column({ name: 'product_id' })
   productId: string;
 
   @Column({ default: 1 })
   quantity: number;
 
-  @CreateDateColumn()
+  @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 }

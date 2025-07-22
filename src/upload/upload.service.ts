@@ -6,7 +6,7 @@ import { v4 as uuid } from 'uuid'
 export class UploadService {
   async uploadAndGetUrls(files: Express.Multer.File[]): Promise<string[]> {
     if (files.length > 5) {
-      throw new BadRequestException('5 tadan ortiq rasm yuklanmaydi');
+      throw new BadRequestException('3 tadan ortiq rasm yuklanmaydi');
     }
 
     const urls: string[] = [];

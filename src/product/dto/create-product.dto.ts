@@ -8,85 +8,91 @@ import {
   IsObject,
   IsArray,
 } from 'class-validator';
-import { MemorySize } from '../entities/product.entity';
 
-export class CreateProductDto {
-  @ApiProperty({ example: "iPhone 13" })
+// MemoryCapacity uchun enum yaratamiz
+export enum MemoryCapacityEnum {
+  GB_64 = '64GB',
+  GB_128 = '128GB',
+  GB_256 = '256GB',
+  GB_512 = '512GB',
+}
+
+export class ProductCreateDto {
+  @ApiProperty({ example: "Galaxy S21" })
   @IsString()
   @IsNotEmpty()
-  model: string;
+  modelName: string;
 
-  @ApiProperty({ example: "Apple iPhone 13" })
+  @ApiProperty({ example: "Samsung Galaxy S21 Ultra" })
   @IsString()
   @IsNotEmpty()
-  title: string;
+  productTitle: string;
 
-  @ApiProperty({ example: "The latest Apple iPhone with advanced features." })
+  @ApiProperty({ example: "Flagship Samsung smartphone with powerful features." })
   @IsString()
   @IsNotEmpty()
-  description: string;
+  productDescription: string;
 
-  @ApiProperty({ enum: MemorySize, example: MemorySize.GB128, required: false })
+  @ApiProperty({ enum: MemoryCapacityEnum, required: false })
   @IsOptional()
-  @IsEnum(MemorySize)
-  memory?: MemorySize;
+  @IsEnum(MemoryCapacityEnum)
+  memoryCapacity?: MemoryCapacityEnum;
 
-  @ApiProperty({ example: "Black", required: false })
-  @IsOptional()
-  @IsString()
-  color?: string;
-
-  @ApiProperty({ example: "A15 Bionic", required: false })
+  @ApiProperty({ example: "Phantom Black", required: false })
   @IsOptional()
   @IsString()
-  cpu?: string;
+  colorTone?: string;
 
-  @ApiProperty({ example: "6.1 inches", required: false })
+  @ApiProperty({ example: "Exynos 2100", required: false })
   @IsOptional()
   @IsString()
-  screen_size?: string;
+  cpuModel?: string;
 
-  @ApiProperty({ example: "3095 mAh", required: false })
+  @ApiProperty({ example: "6.8 inches", required: false })
   @IsOptional()
   @IsString()
-  battery?: string;
+  displaySize?: string;
 
-  @ApiProperty({ example: "12MP", required: false })
+  @ApiProperty({ example: "5000 mAh", required: false })
   @IsOptional()
   @IsString()
-  front_camera?: string;
+  batteryCapacity?: string;
 
-  @ApiProperty({ example: "12MP", required: false })
+  @ApiProperty({ example: "40MP", required: false })
   @IsOptional()
   @IsString()
-  main_camera?: string;
+  frontCam?: string;
 
-  @ApiProperty({ example: 999.99 })
+  @ApiProperty({ example: "108MP", required: false })
+  @IsOptional()
+  @IsString()
+  mainCam?: string;
+
+  @ApiProperty({ example: 1199.99 })
   @IsNotEmpty()
   @IsNumber()
-  price: number;
+  cost: number;
 
-  @ApiProperty({ example: "some-category-id" })
+  @ApiProperty({ example: "electronics-category-id" })
   @IsNotEmpty()
   @IsString()
-  categoryId: string;
+  categoryRef: string;
 
   @ApiProperty({
     example: {
-      iso: "100–3200",
-      zoom: "30x optical",
-      waterproof: true,
+      iso: "50–102400",
+      zoom: "100x digital",
+      waterproof: false,
     },
     required: false,
-    description: "Extra specifications for special products like cameras, smartwatches etc."
+    description: "Extra details for special product types"
   })
   @IsOptional()
   @IsObject()
-  extraSpecs?: Record<string, any>;
+  additionalSpecs?: Record<string, any>;
 
-@IsArray()
-@IsString({ each: true }) 
-@ApiProperty({ type: [String], example: ["https://example.com/image1.jpg"] })
-image: string[];
-
+  @ApiProperty({ type: [String], example: ["https://example.com/photos/galaxy1.jpg", "https://example.com/photos/galaxy2.jpg"] })
+  @IsArray()
+  @IsString({ each: true })
+  images: string[];
 }

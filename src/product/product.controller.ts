@@ -1,97 +1,123 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UploadedFiles, UseInterceptors, UseGuards, Put, Query } from '@nestjs/common';
-import { ProductService } from './product.service'
-import { CreateProductDto } from './dto/create-product.dto';
-import { FilesInterceptor } from '@nestjs/platform-express';
-import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOperation, ApiQuery, ApiResponse } from '@nestjs/swagger';
-import { AuthGuard } from '@nestjs/passport';
-import { RolesGuard } from 'src/common/guards/roles.guard';
-import { Roles } from 'src/common/decorators/roles.decorator';
-import { Role } from 'src/auth/role.enum';
-import { UpdateProductDto } from "./dto/update-product.dto"
-
-@Controller('api/product')
-export class ProductController {
-    constructor(private readonly productService: ProductService) { }
-
-
-    //////////// product CRUD ////////////
-    @Post("create")
-    @UseGuards(AuthGuard("jwt"), RolesGuard)
+import {
+    Controller,
+    Post,
+    Get,
+    Param,
+    Body,
+    Put,
+    Delete,
+    UploadedFiles,
+    UseGuards,
+    UseInterceptors,
+    Query,
+  } from '@nestjs/common';
+  import { ProductService } from './product.service';
+  import { ProductCreateDto } from './dto/create-product.dto';
+  import { UpdateProductDto } from './dto/update-product.dto';
+  import { FilesInterceptor } from '@nestjs/platform-express';
+  import { AuthGuard } from '@nestjs/passport';
+  import{AccessTokenStrategy} from '../auth/strategies/jwt.strategy'
+  import { RolesGuard } from 'src/common/guards/roles.guard';
+  import { Roles } from 'src/common/decorators/roles.decorator';
+  import { Role } from 'src/auth/role.enum';
+  import {
+    ApiBearerAuth,
+    ApiBody,
+    ApiConsumes,
+    ApiOperation,
+    ApiQuery,
+    ApiResponse,
+  } from '@nestjs/swagger';
+  
+  @Controller('api/product')
+  export class ProductController {
+    constructor(private readonly productService: ProductService) {}
+  
+    // Create new product
+    @Post('create')
+    @UseGuards(AuthGuard('jwt'), RolesGuard)
     @Roles(Role.SUPERADMIN, Role.ADMIN)
     @UseInterceptors(FilesInterceptor('image', 5))
-    @ApiConsumes('multipart/form-data')
-    @ApiOperation({ summary: 'Telefon yaratish' })
-    @ApiOperation({ summary: 'Telefon yaratish uchun fayllarni yuklash mumkin!' })
-    @ApiOperation({ summary: 'Fayllar maksimal 5 ta bo‘lishi kerak!' })
-    @ApiResponse({ status: 201, description: 'Telefon muvaffaqiyatli yaratildi' })
-    @ApiResponse({ status: 409, description: 'Ushbu modeldagi telefon mavjud!' })
-    @ApiResponse({ status: 500, description: 'Serverda xato yuz berdi' })
-    @ApiResponse({ status: 400, description: 'Noto‘g‘ri so‘rov' })
-    @ApiResponse({ status: 404, description: 'Kategoriyalar topilmadi' })
     @ApiBearerAuth()
-    async createProduct(
-        @Body() createProductDto: CreateProductDto,
-        @UploadedFiles() file: Express.Multer.File[],
+    @ApiConsumes('multipart/form-data')
+    @ApiOperation({ summary: 'Yangi mahsulot qo‘shish (faqat adminlar)' })
+    @ApiResponse({ status: 201, description: 'Mahsulot muvaffaqiyatli yaratildi' })
+    @ApiResponse({ status: 400, description: 'Yaroqsiz so‘rov maʼlumotlari' })
+    @ApiResponse({ status: 404, description: 'Kategoriya topilmadi' })
+    @ApiResponse({ status: 409, description: 'Bu model allaqachon mavjud' })
+    @ApiResponse({ status: 500, description: 'Serverda ichki xatolik' })
+    async create(
+      @Body() dto: ProductCreateDto,
+      @UploadedFiles() files: Express.Multer.File[],
     ) {
-        return this.productService.createProduct(createProductDto, file);
+      return this.productService.createProduct(dto, files);
     }
-    @Get("all")
-    @ApiOperation({ summary: 'Barcha productlarni olish' })
-    @ApiResponse({ status: 200, description: 'Barcha productlar muvaffaqiyatli olindi' })
-    @ApiResponse({ status: 404, description: 'productlar topilmadi' })
-    @ApiResponse({ status: 500, description: 'Serverda xato yuz berdi' })
-    async findAllproducts() {
-        return this.productService.findAllproducts();
+  
+    // Get all products
+    @Get('all')
+    @ApiOperation({ summary: 'Barcha mahsulotlarni ro‘yxatini olish' })
+    @ApiResponse({ status: 200, description: 'Mahsulotlar ro‘yxati' })
+    @ApiResponse({ status: 500, description: 'Serverda muammo' })
+    async getAll() {
+      return this.productService.findAllproducts();
     }
-
-    @Get(":id/find")
-    @ApiOperation({ summary: 'product ID bo‘yicha topish' })
-    @ApiResponse({ status: 200, description: 'product muvaffaqiyatli topildi' })
-    @ApiResponse({ status: 404, description: 'product topilmadi' })
-    @ApiResponse({ status: 500, description: 'Serverda xato yuz berdi' })
-    async findOneproduct(@Param('id') id: string) {
-        return this.productService.findOneproduct(id)
+  
+    // Get product by ID
+    @Get(':id/find')
+    @ApiOperation({ summary: 'ID orqali mahsulotni qidirish' })
+    @ApiResponse({ status: 200, description: 'Mahsulot topildi' })
+    @ApiResponse({ status: 404, description: 'Mahsulot mavjud emas' })
+    async getById(@Param('id') id: string) {
+      return this.productService.findOneproduct(id);
     }
-
+  
+    // Update product
     @Put(':id/update')
-    @UseGuards(AuthGuard("jwt"), RolesGuard)
+    @UseGuards(AuthGuard('jwt'), RolesGuard)
     @Roles(Role.SUPERADMIN, Role.ADMIN)
     @UseInterceptors(FilesInterceptor('image', 5))
+    @ApiBearerAuth()
     @ApiConsumes('multipart/form-data')
-    @ApiOperation({ summary: 'Faqat superadmin va admin huquqi bor!' })
-    @ApiResponse({ status: 200, description: 'product muvaffaqiyatli yangilandi' })
-    @ApiResponse({ status: 404, description: 'product topilmadi' })
-    @ApiResponse({ status: 500, description: 'Serverda xato yuz berdi' })
-    @ApiResponse({ status: 400, description: 'Noto‘g‘ri so‘rov' })
-    @ApiBearerAuth()
+    @ApiOperation({ summary: 'Mahsulotni tahrirlash (adminlar uchun)' })
     @ApiBody({
-        type: UpdateProductDto,
-        description: 'Yangilash uchun product ma\'lumotlari',
+      type: UpdateProductDto,
+      description: 'Yangilanadigan mahsulot maʼlumotlari',
     })
-    async updateproduct(@Param('id') id: string, @Body() updateProductDto: UpdateProductDto, @UploadedFiles() image: Express.Multer.File[],) {
-        return this.productService.updateproduct(id, updateProductDto, image);
+    @ApiResponse({ status: 200, description: 'Mahsulot yangilandi' })
+    @ApiResponse({ status: 404, description: 'Mahsulot topilmadi' })
+    @ApiResponse({ status: 400, description: 'Noto‘g‘ri maʼlumot' })
+    async update(
+      @Param('id') id: string,
+      @Body() dto: UpdateProductDto,
+      @UploadedFiles() files: Express.Multer.File[],
+    ) {
+      return this.productService.updateproduct(id, dto, files);
     }
-
+  
+    // Delete product
     @Delete(':id/delete')
-    @UseGuards(AuthGuard("jwt"), RolesGuard)
+    @UseGuards(AuthGuard('jwt'), RolesGuard)
     @Roles(Role.SUPERADMIN, Role.ADMIN)
-    @ApiOperation({ summary: 'product ID bo‘yicha o‘chirish' })
-    @ApiOperation({ summary: 'Faqat superadmin va admin huquqi bor!' })
-    @ApiResponse({ status: 200, description: 'product muvaffaqiyatli o‘chirildi' })
-    @ApiResponse({ status: 404, description: 'product topilmadi' })
-    @ApiResponse({ status: 500, description: 'Serverda xato yuz berdi' })
-    @ApiResponse({ status: 400, description: 'Noto‘g‘ri so‘rov' })
-    @ApiResponse({ status: 401, description: 'Ruxsat etilmagan' })
     @ApiBearerAuth()
-    async remove(@Param('id') id: string) {
-        return this.productService.removeproduct(id)
+    @ApiOperation({ summary: 'Mahsulotni o‘chirish (adminlar)' })
+    @ApiResponse({ status: 200, description: 'Mahsulot o‘chirildi' })
+    @ApiResponse({ status: 404, description: 'Topilmadi' })
+    @ApiResponse({ status: 401, description: 'Ruxsat yo‘q' })
+    async delete(@Param('id') id: string) {
+      return this.productService.removeproduct(id);
     }
-
-
+  
+    // Search products
     @Get('search')
-    @ApiOperation({ summary: 'Search products by name or description' })
-    @ApiQuery({ name: 'q', required: true, example: 'iPhone', description: 'Search keyword' })
-    async searchProducts(@Query('q') query: string) {
-        return this.productService.searchProducts(query);
+    @ApiOperation({ summary: 'Mahsulotlarni qidirish' })
+    @ApiQuery({
+      name: 'q',
+      required: true,
+      example: 'samsung',
+      description: 'Qidiruv uchun kalit so‘z',
+    })
+    async search(@Query('q') keyword: string) {
+      return this.productService.searchProducts(keyword);
     }
-}
+  }
+  

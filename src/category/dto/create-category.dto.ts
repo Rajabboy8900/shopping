@@ -1,9 +1,12 @@
+import { IsNotEmpty, IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsNotEmpty } from 'class-validator';
 
 export class CreateCategoryDto {
-    @ApiProperty({ example: "Phones" })
-    @IsString()
-    @IsNotEmpty()
-    name: string;
+  @ApiProperty({
+    description: 'Kategoriya nomi',
+    example: 'Smartfonlar',
+  })
+  @IsString({ message: 'Kategoriya nomi matn ko‘rinishida bo‘lishi kerak' })
+  @IsNotEmpty({ message: 'Kategoriya nomi bo‘sh bo‘lishi mumkin emas' })
+  name: string;
 }

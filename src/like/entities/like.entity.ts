@@ -1,5 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, ManyToOne, JoinColumn } from 'typeorm';
-import { Auth } from 'src/auth/entities/auth.entity';
+import { UserAccount } from 'src/auth/entities/auth.entity';
 import { Product } from 'src/product/entities/product.entity';
 
 @Entity()
@@ -7,9 +7,9 @@ export class Like {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ManyToOne(() => Auth, auth => auth.likes, { onDelete: 'CASCADE' })
+  @ManyToOne(() => UserAccount, auth => auth, { onDelete: 'CASCADE' })
   @JoinColumn()
-  auth: Auth;
+  auth: UserAccount;
 
   @ManyToOne(() => Product, product => product.likes, { onDelete: 'CASCADE' })
   @JoinColumn()

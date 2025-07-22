@@ -1,27 +1,31 @@
-import { Injectable } from '@nestjs/common';
-import * as nodemailer from 'nodemailer'
-
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import * as nodemailer from 'nodemailer';
 
 @Injectable()
 export class EmailService {
-    emailTransporter() {
-        const transporter = nodemailer.createTransport({
-            service: "gmail",
-            auth: {
-                user: process.env.GMAIL_USER,
-                pass: process.env.GMAIL_PASS
-            }
-        });
-        return transporter;
+  private createTransport() {
+    return nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: process.env.GMAIL_USER,
+        pass: process.env.GMAIL_PASS,
+      },
+    });
+  }
+
+  async sendOtpCode(to: string, code: string): Promise<void> {
+    const emailData = {
+      from: `"Do'kon Support" <${process.env.GMAIL_USER}>`,
+      to,
+      subject: 'Tasdiqlash kodi',
+      text: `Sizning tasdiqlash kodingiz: ${code}`,
+      html: `<p>Sizning <b>tasdiqlash kodingiz</b>: <strong>${code}</strong></p>`,
+    };
+
+    try {
+      await this.createTransport().sendMail(emailData);
+    } catch (error) {
+      throw new InternalServerErrorException('Kod yuborishda xatolik yuz berdi');
     }
-    async sendEmailOtp(email: string, otp: string) {
-        const mailOptions = {
-            from: `"E-Store" <${process.env.MAIL_USER}>`,
-            to: email,
-            subject: 'Your OTP Code',
-            text: `Your OTP code is: ${otp}`,
-            html: `<p>Your <b>OTP</b> code is: <strong>${otp}</strong></p>`,
-        }
-         await this.emailTransporter().sendMail(mailOptions)
-    }
+  }
 }
