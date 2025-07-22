@@ -24,7 +24,7 @@ jobs:
             set -e
             cd /home/ubuntu
             rm -rf shopping
-            git clone https://github.com/Rajabboy8900/shopping
+            git clone https://github.com/Rajabboy8900/shopping.git
             cd shopping
 
             # .env faylni yaratish
@@ -43,10 +43,6 @@ jobs:
             # Paketlarni o‘rnatish va build
             npm install
             npm run build
-
-            # Prisma migrate (agar ishlatilsa)
-            npx prisma generate || true
-            npx prisma migrate deploy || true
 
             # PM2 bilan ishga tushirish
             pm2 delete shopping || true
