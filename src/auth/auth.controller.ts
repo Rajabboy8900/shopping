@@ -215,7 +215,7 @@ export class AuthController {
   @Post('reset_password')
   @ApiOperation({ 
     summary: 'Parolni tiklash',
-    description: 'OTP kod yordamida yangi parol o‘rnatish'
+    description: 'OTP kod  yordamida yangi parol o‘rnatish'
   })
   @ApiBody({ type: ResetPasswordDto })
   @ApiOkResponse({ 
